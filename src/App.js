@@ -1,26 +1,94 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import { getRootDirectory } from "./services";
+import Directory from "./Directory";
+import File from "./File";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+  constructor() {
+    super();
+
+    this.state = {
+      contents: undefined
+    };
+
+    this.toggleExpansion = this.toggleExpansion.bind(this);
+  }
+
+  async componentDidMount() {
+    const filesystemData = await getRootDirectory();
+
+    this.setState({
+      contents: attachExpansionStates(filesystemData)
+    });
+  }
+
+  toggleExpansion(path) {
+    const toggleExpansion = contents =>
+      contents.reduce((acc, c) => {
+        if (c.type === "directory") {
+          return acc.concat([
+            c.path === path
+              ? { ...c, expanded: !c.expanded }
+              : { ...c, contents: toggleExpansion(c.contents) }
+          ]);
+        }
+
+        return acc.concat([c]);
+      }, []);
+
+    this.setState({
+      contents: toggleExpansion(this.state.contents)
+    });
+  }
+
+  render() {
+    const { contents } = this.state;
+    const { toggleExpansion } = this;
+
+    if (!contents) {
+      return "Loading...";
+    }
+
+    return (
+      <table>
+        <tr>
+          <td className="directory-name">/</td>
+        </tr>
+        <tr className="contents">
+          <td>
+            {contents.map(obj =>
+              obj.type === "directory" ? (
+                <Directory
+                  {...obj}
+                  key={obj.path}
+                  expansionToggleHandler={toggleExpansion}
+                />
+              ) : (
+                <File {...obj} key={obj.path} />
+              )
+            )}
+          </td>
+        </tr>
+      </table>
+    );
+  }
 }
+
+const attachExpansionStates = contents => {
+  const expanded = false;
+
+  return contents.map(obj => {
+    if (obj.type === "directory") {
+      return {
+        ...obj,
+        expanded,
+        contents: attachExpansionStates(obj.contents)
+      };
+    }
+
+    return obj;
+  });
+};
 
 export default App;
