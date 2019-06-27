@@ -24,13 +24,13 @@ class App extends React.Component {
   }
 
   toggleExpansion(path) {
-    const toggleExpansion = contents =>
+    const toggleExpansionState = contents =>
       contents.reduce((acc, c) => {
         if (c.type === "directory") {
           return acc.concat([
             c.path === path
               ? { ...c, expanded: !c.expanded }
-              : { ...c, contents: toggleExpansion(c.contents) }
+              : { ...c, contents: toggleExpansionState(c.contents) }
           ]);
         }
 
@@ -38,7 +38,7 @@ class App extends React.Component {
       }, []);
 
     this.setState({
-      contents: toggleExpansion(this.state.contents)
+      contents: toggleExpansionState(this.state.contents, path)
     });
   }
 
