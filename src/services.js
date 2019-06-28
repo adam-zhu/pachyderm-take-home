@@ -55,14 +55,9 @@ export const moveFile = async ({ originalPath, newPath }) => {
   );
   const copyResult = await copyResponse.json();
 
-  console.log({ originalPath, newPath });
-  console.log(copyResult);
-
   if (copyResult.status === "success") {
     const deleteResponse = await makeRequest("DELETE", originalPath);
     const deleteResult = await deleteResponse.json();
-
-    console.log(deleteResult);
   }
 
   return Promise.resolve();

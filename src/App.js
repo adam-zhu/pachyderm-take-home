@@ -182,7 +182,7 @@ const mergeExpansionStates = (oldContents, newContents) => {
     if (obj.type === "directory") {
       return {
         ...obj,
-        expanded: findOldExpandedState(obj.path, oldContents),
+        expanded: findExpandedState(obj.path, oldContents),
         contents: mergeExpansionStates(oldContents, obj.contents)
       };
     }
@@ -191,12 +191,10 @@ const mergeExpansionStates = (oldContents, newContents) => {
   });
 };
 
-const findOldExpandedState = (path, contents) => {
+const findExpandedState = (path, contents) => {
   return contents.reduce((acc, c) => {
     if (c.type === "directory") {
-      return c.path === path
-        ? c.expanded
-        : findOldExpandedState(path, c.contents);
+      return c.path === path ? c.expanded : findExpandedState(path, c.contents);
     }
 
     return acc;
