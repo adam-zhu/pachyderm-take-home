@@ -1,8 +1,8 @@
 import React from "react";
 
-const File = ({ name, path, atime, mtime }) => {
+const File = ({ name, path, atime, mtime, openFileHandler }) => {
   return (
-    <tr className="file">
+    <tr className="file" onClick={e => openFileHandler(path)}>
       <td>{name}</td>
       <td>
         <em>atime</em> {new Date(atime).toLocaleString()}

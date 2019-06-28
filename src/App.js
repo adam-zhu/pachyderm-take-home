@@ -1,18 +1,22 @@
 import React from "react";
 import "./App.css";
-import { getRootDirectory } from "./services";
+import { getRootDirectory, getFile } from "./services";
 import Directory from "./Directory";
 import File from "./File";
+import FileModal from "./FileModal";
 
 class App extends React.Component {
   constructor() {
     super();
 
     this.state = {
-      contents: undefined
+      contents: undefined,
+      openedFile: undefined
     };
 
     this.toggleExpansion = this.toggleExpansion.bind(this);
+    this.openFile = this.openFile.bind(this);
+    this.closeFile = this.closeFile.bind(this);
   }
 
   async componentDidMount() {
@@ -20,6 +24,30 @@ class App extends React.Component {
 
     this.setState({
       contents: attachExpansionStates(filesystemData)
+    });
+  }
+
+  async openFile(path) {
+    this.setState({
+      openedFile: {
+        contents: undefined,
+        path
+      }
+    });
+
+    const contents = await getFile(path);
+
+    this.setState({
+      openedFile: {
+        ...this.state.openedFile,
+        contents
+      }
+    });
+  }
+
+  closeFile() {
+    this.setState({
+      openedFile: undefined
     });
   }
 
@@ -43,34 +71,40 @@ class App extends React.Component {
   }
 
   render() {
-    const { contents } = this.state;
-    const { toggleExpansion } = this;
+    const { contents, openedFile } = this.state;
+    const { toggleExpansion, openFile, closeFile } = this;
 
     if (!contents) {
       return "Loading...";
     }
 
     return (
-      <table>
-        <tr>
-          <td className="directory-name">/</td>
-        </tr>
-        <tr className="contents">
-          <td>
-            {contents.map(obj =>
-              obj.type === "directory" ? (
-                <Directory
-                  {...obj}
-                  key={obj.path}
-                  expansionToggleHandler={toggleExpansion}
-                />
-              ) : (
-                <File {...obj} key={obj.path} />
-              )
-            )}
-          </td>
-        </tr>
-      </table>
+      <>
+        <table>
+          <tr>
+            <td className="directory-name">/</td>
+          </tr>
+          <tr className="contents">
+            <td>
+              {contents.map(obj =>
+                obj.type === "directory" ? (
+                  <Directory
+                    {...obj}
+                    key={obj.path}
+                    expansionToggleHandler={toggleExpansion}
+                    openFileHandler={openFile}
+                  />
+                ) : (
+                  <File {...obj} key={obj.path} openFileHandler={openFile} />
+                )
+              )}
+            </td>
+          </tr>
+        </table>
+        {typeof openedFile !== "undefined" && (
+          <FileModal data={openedFile} closeHandler={closeFile} />
+        )}
+      </>
     );
   }
 }

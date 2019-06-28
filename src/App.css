@@ -17,3 +17,37 @@ td.directory-name {
 tr.contents > td:first-child {
   padding-left: 2rem;
 }
+
+tr.file:hover {
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100000;
+  background: rgba(0, 0, 0, 0.69);
+}
+
+.modal .inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 2rem;
+}
+
+.modal .inner .content {
+  position: relative;
+}
+
+.modal .inner .content button {
+  position: absolute;
+  top: -2rem;
+  right: -1rem;
+}

@@ -6,7 +6,8 @@ const Directory = ({
   path,
   contents,
   expanded,
-  expansionToggleHandler
+  expansionToggleHandler,
+  openFileHandler
 }) => {
   return (
     <table>
@@ -22,20 +23,29 @@ const Directory = ({
         <ExpandedBody
           contents={contents}
           expansionToggleHandler={expansionToggleHandler}
+          openFileHandler={openFileHandler}
         />
       )}
     </table>
   );
 };
 
-const ExpandedBody = ({ contents, expansionToggleHandler }) => (
+const ExpandedBody = ({
+  contents,
+  expansionToggleHandler,
+  openFileHandler
+}) => (
   <tr className="contents">
     <td>
       {contents.map(c =>
         c.type === "file" ? (
-          <File {...c} />
+          <File {...c} openFileHandler={openFileHandler} />
         ) : (
-          <Directory {...c} expansionToggleHandler={expansionToggleHandler} />
+          <Directory
+            {...c}
+            expansionToggleHandler={expansionToggleHandler}
+            openFileHandler={openFileHandler}
+          />
         )
       )}
     </td>
