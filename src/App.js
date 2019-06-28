@@ -119,40 +119,25 @@ class App extends React.Component {
       return "Loading...";
     }
 
+    const rootDirectory = {
+      name: "root",
+      path: "/",
+      contents
+    };
+
     return (
       <>
-        <table>
-          <tr>
-            <td className="directory-name">/</td>
-          </tr>
-          <tr className="contents">
-            <td>
-              {contents.map(obj =>
-                obj.type === "directory" ? (
-                  <Directory
-                    {...obj}
-                    key={obj.path}
-                    hoveredDropTarget={hoveredDropTarget}
-                    grabbedFile={grabbedFile}
-                    expansionToggleHandler={toggleExpansion}
-                    openFileHandler={openFile}
-                    fileGrabHandler={setGrabbedFile}
-                    hoverOverHandler={setHoveredDropTarget}
-                    dropHandler={doMoveFile}
-                  />
-                ) : (
-                  <File
-                    {...obj}
-                    key={obj.path}
-                    grabbedFile={grabbedFile}
-                    openFileHandler={openFile}
-                    fileGrabHandler={setGrabbedFile}
-                  />
-                )
-              )}
-            </td>
-          </tr>
-        </table>
+        <Directory
+          {...rootDirectory}
+          expanded={true}
+          hoveredDropTarget={hoveredDropTarget}
+          grabbedFile={grabbedFile}
+          expansionToggleHandler={toggleExpansion}
+          openFileHandler={openFile}
+          fileGrabHandler={setGrabbedFile}
+          hoverOverHandler={setHoveredDropTarget}
+          dropHandler={doMoveFile}
+        />
         {typeof openedFile !== "undefined" && (
           <FileModal data={openedFile} closeHandler={closeFile} />
         )}
