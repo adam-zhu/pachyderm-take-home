@@ -86,6 +86,10 @@ class App extends React.Component {
   }
 
   async doMoveFile() {
+    this.setState({
+      grabbedFile: undefined
+    });
+
     const originalPath = this.state.grabbedFile.path;
     const newPath = `${this.state.hoveredDropTarget}/${
       this.state.grabbedFile.name
@@ -96,7 +100,7 @@ class App extends React.Component {
     const filesystemData = await getRootDirectory();
 
     this.setState({
-      contents: attachExpansionStates(filesystemData)
+      contents: mergeExpansionStates(this.state.contents, filesystemData)
     });
   }
 
@@ -171,6 +175,32 @@ const attachExpansionStates = contents => {
 
     return obj;
   });
+};
+
+const mergeExpansionStates = (oldContents, newContents) => {
+  return newContents.map(obj => {
+    if (obj.type === "directory") {
+      return {
+        ...obj,
+        expanded: findOldExpandedState(obj.path, oldContents),
+        contents: mergeExpansionStates(oldContents, obj.contents)
+      };
+    }
+
+    return obj;
+  });
+};
+
+const findOldExpandedState = (path, contents) => {
+  return contents.reduce((acc, c) => {
+    if (c.type === "directory") {
+      return c.path === path
+        ? c.expanded
+        : findOldExpandedState(path, c.contents);
+    }
+
+    return acc;
+  }, false);
 };
 
 export default App;

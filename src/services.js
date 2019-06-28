@@ -6,6 +6,9 @@ const makeRequest = async (method, stub, body) => {
     mode: "cors",
     cache: "no-cache",
     credentials: "omit",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
     body
   });
 
@@ -45,19 +48,21 @@ export const getFile = async path => {
 };
 
 export const moveFile = async ({ originalPath, newPath }) => {
-  const copyResponse = await makeRequest("POST", `copy${originalPath}`, {
-    destination: newPath
-  });
+  const copyResponse = await makeRequest(
+    "POST",
+    `copy${originalPath}`,
+    `destination=${newPath}`
+  );
   const copyResult = await copyResponse.json();
 
-  // console.log({ originalPath, newPath });
-  // console.log(copyResult);
+  console.log({ originalPath, newPath });
+  console.log(copyResult);
 
   if (copyResult.status === "success") {
     const deleteResponse = await makeRequest("DELETE", originalPath);
     const deleteResult = await deleteResponse.json();
 
-    // console.log(deleteResult);
+    console.log(deleteResult);
   }
 
   return Promise.resolve();

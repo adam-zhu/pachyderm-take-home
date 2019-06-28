@@ -70,6 +70,7 @@ const ExpandedBody = ({
           <Directory
             {...c}
             hoveredDropTarget={hoveredDropTarget}
+            grabbedFile={grabbedFile}
             expansionToggleHandler={expansionToggleHandler}
             openFileHandler={openFileHandler}
             fileGrabHandler={fileGrabHandler}
