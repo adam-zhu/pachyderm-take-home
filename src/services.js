@@ -1,11 +1,12 @@
 const ROOT = "http://178.128.71.229:8080/pfs/";
 
-const makeRequest = async (method, stub) => {
+const makeRequest = async (method, stub, body) => {
   const response = await fetch(`${ROOT}${stub}`, {
     method,
     mode: "cors",
     cache: "no-cache",
-    credentials: "omit"
+    credentials: "omit",
+    body
   });
 
   return response;
@@ -31,7 +32,7 @@ export const getRootDirectory = async () => {
   return responseData;
 };
 
-export const getDirectory = async path => {
+const getDirectory = async path => {
   const responseData = await doDirRequest("GET", `dir${path}`);
 
   return responseData;
@@ -40,9 +41,26 @@ export const getDirectory = async path => {
 export const getFile = async path => {
   const responseData = await doFileRequest("GET", `file${path}`);
 
-  console.log(responseData);
-
   return responseData;
+};
+
+export const moveFile = async ({ originalPath, newPath }) => {
+  const copyResponse = await makeRequest("POST", `copy${originalPath}`, {
+    destination: newPath
+  });
+  const copyResult = await copyResponse.json();
+
+  // console.log({ originalPath, newPath });
+  // console.log(copyResult);
+
+  if (copyResult.status === "success") {
+    const deleteResponse = await makeRequest("DELETE", originalPath);
+    const deleteResult = await deleteResponse.json();
+
+    // console.log(deleteResult);
+  }
+
+  return Promise.resolve();
 };
 
 const getDirectoryContents = async path => {

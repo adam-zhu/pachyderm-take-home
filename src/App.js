@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { getRootDirectory, getFile } from "./services";
+import { getRootDirectory, getFile, moveFile } from "./services";
 import Directory from "./Directory";
 import File from "./File";
 import FileModal from "./FileModal";
@@ -11,12 +11,17 @@ class App extends React.Component {
 
     this.state = {
       contents: undefined,
-      openedFile: undefined
+      openedFile: undefined,
+      grabbedFile: undefined,
+      hoveredDropTarget: undefined
     };
 
     this.toggleExpansion = this.toggleExpansion.bind(this);
     this.openFile = this.openFile.bind(this);
     this.closeFile = this.closeFile.bind(this);
+    this.setGrabbedFile = this.setGrabbedFile.bind(this);
+    this.setHoveredDropTarget = this.setHoveredDropTarget.bind(this);
+    this.doMoveFile = this.doMoveFile.bind(this);
   }
 
   async componentDidMount() {
@@ -24,6 +29,25 @@ class App extends React.Component {
 
     this.setState({
       contents: attachExpansionStates(filesystemData)
+    });
+  }
+
+  toggleExpansion(path) {
+    const toggleExpansionState = contents =>
+      contents.reduce((acc, c) => {
+        if (c.type === "directory") {
+          return acc.concat([
+            c.path === path
+              ? { ...c, expanded: !c.expanded }
+              : { ...c, contents: toggleExpansionState(c.contents) }
+          ]);
+        }
+
+        return acc.concat([c]);
+      }, []);
+
+    this.setState({
+      contents: toggleExpansionState(this.state.contents, path)
     });
   }
 
@@ -51,28 +75,41 @@ class App extends React.Component {
     });
   }
 
-  toggleExpansion(path) {
-    const toggleExpansionState = contents =>
-      contents.reduce((acc, c) => {
-        if (c.type === "directory") {
-          return acc.concat([
-            c.path === path
-              ? { ...c, expanded: !c.expanded }
-              : { ...c, contents: toggleExpansionState(c.contents) }
-          ]);
-        }
+  setGrabbedFile(grabbedFile) {
+    this.setState({ grabbedFile });
+  }
 
-        return acc.concat([c]);
-      }, []);
+  setHoveredDropTarget(hoveredDropTarget) {
+    this.setState({
+      hoveredDropTarget
+    });
+  }
+
+  async doMoveFile() {
+    const originalPath = this.state.grabbedFile.path;
+    const newPath = `${this.state.hoveredDropTarget}/${
+      this.state.grabbedFile.name
+    }`;
+
+    await moveFile({ originalPath, newPath });
+
+    const filesystemData = await getRootDirectory();
 
     this.setState({
-      contents: toggleExpansionState(this.state.contents, path)
+      contents: attachExpansionStates(filesystemData)
     });
   }
 
   render() {
-    const { contents, openedFile } = this.state;
-    const { toggleExpansion, openFile, closeFile } = this;
+    const { contents, openedFile, grabbedFile, hoveredDropTarget } = this.state;
+    const {
+      toggleExpansion,
+      openFile,
+      closeFile,
+      setGrabbedFile,
+      setHoveredDropTarget,
+      doMoveFile
+    } = this;
 
     if (!contents) {
       return "Loading...";
@@ -91,11 +128,22 @@ class App extends React.Component {
                   <Directory
                     {...obj}
                     key={obj.path}
+                    hoveredDropTarget={hoveredDropTarget}
+                    grabbedFile={grabbedFile}
                     expansionToggleHandler={toggleExpansion}
                     openFileHandler={openFile}
+                    fileGrabHandler={setGrabbedFile}
+                    hoverOverHandler={setHoveredDropTarget}
+                    dropHandler={doMoveFile}
                   />
                 ) : (
-                  <File {...obj} key={obj.path} openFileHandler={openFile} />
+                  <File
+                    {...obj}
+                    key={obj.path}
+                    grabbedFile={grabbedFile}
+                    openFileHandler={openFile}
+                    fileGrabHandler={setGrabbedFile}
+                  />
                 )
               )}
             </td>

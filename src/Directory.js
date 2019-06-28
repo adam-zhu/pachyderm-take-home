@@ -6,15 +6,26 @@ const Directory = ({
   path,
   contents,
   expanded,
+  hoveredDropTarget,
+  grabbedFile,
   expansionToggleHandler,
-  openFileHandler
+  openFileHandler,
+  fileGrabHandler,
+  hoverOverHandler,
+  dropHandler
 }) => {
   return (
     <table>
       <tr>
         <td
-          className="directory-name expandable"
+          className={`directory-name expandable ${
+            hoveredDropTarget === path ? "hovered" : ""
+          }`}
           onClick={e => expansionToggleHandler(path)}
+          onDragEnter={e => hoverOverHandler(path)}
+          onDragLeave={e => hoverOverHandler(undefined)}
+          onDrop={e => dropHandler()}
+          onDragOver={e => e.preventDefault()}
         >
           {expanded ? "-" : "+"} {name}
         </td>
@@ -22,8 +33,13 @@ const Directory = ({
       {expanded && (
         <ExpandedBody
           contents={contents}
+          hoveredDropTarget={hoveredDropTarget}
+          grabbedFile={grabbedFile}
           expansionToggleHandler={expansionToggleHandler}
           openFileHandler={openFileHandler}
+          fileGrabHandler={fileGrabHandler}
+          hoverOverHandler={hoverOverHandler}
+          dropHandler={dropHandler}
         />
       )}
     </table>
@@ -32,19 +48,33 @@ const Directory = ({
 
 const ExpandedBody = ({
   contents,
+  hoveredDropTarget,
+  grabbedFile,
   expansionToggleHandler,
-  openFileHandler
+  openFileHandler,
+  fileGrabHandler,
+  hoverOverHandler,
+  dropHandler
 }) => (
   <tr className="contents">
     <td>
       {contents.map(c =>
         c.type === "file" ? (
-          <File {...c} openFileHandler={openFileHandler} />
+          <File
+            {...c}
+            grabbedFile={grabbedFile}
+            openFileHandler={openFileHandler}
+            fileGrabHandler={fileGrabHandler}
+          />
         ) : (
           <Directory
             {...c}
+            hoveredDropTarget={hoveredDropTarget}
             expansionToggleHandler={expansionToggleHandler}
             openFileHandler={openFileHandler}
+            fileGrabHandler={fileGrabHandler}
+            hoverOverHandler={hoverOverHandler}
+            dropHandler={dropHandler}
           />
         )
       )}

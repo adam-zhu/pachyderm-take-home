@@ -1,5 +1,9 @@
+table {
+  font-size: 1.25rem;
+}
+
 td {
-  padding: 0.125rem 0.5rem;
+  padding: 0.25rem 1rem;
 }
 
 table > tr td:first-child {
@@ -14,6 +18,10 @@ td.directory-name {
   font-weight: bold;
 }
 
+td.hovered {
+  opacity: 0.5;
+}
+
 tr.contents > td:first-child {
   padding-left: 2rem;
 }
@@ -21,6 +29,10 @@ tr.contents > td:first-child {
 tr.file:hover {
   cursor: pointer;
   opacity: 0.5;
+}
+
+tr.grabbed td {
+  color: lightgreen;
 }
 
 .modal {
